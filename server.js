@@ -1,40 +1,30 @@
-/*
-  📦 Dependy the Importer  
-  Zaimportuj wszystkie wymagane moduły: path, express, body-parser, logger oraz routing.  
-*/
-const http = require("http");
+const express = require("express");
+const bodyParser = require("body-parser");
+const morgan = require("morgan");
+const path = require("path");
 const config = require("./config");
 const { requestRouting } = require("./routing/routing");
 
-const requestListener = (request, response) => {
-  requestRouting(request, response);
-};
 
-const server = http.createServer(requestListener);
+const app = express();
 
-server.listen(config.PORT);
 
-/*
-  🏗 Structo the Builder  
-  Utwórz instancję aplikacji express i zapisz ją w stałej app.  
-*/
-/*
-  🏗 Structo the Builder  
-  Zarejestruj middleware body-parser do parsowania ciał formularzy. 
-*/
-/*
-  🏗 Structo the Builder  
-  Dodaj middleware logujący informacje o każdym przychodzącym żądaniu.  
-*/
-/*
-  🏗 Structo the Builder  
-  Zarejestruj middleware obsługujące poszczególne ścieżki.  
-*/
-/*
-  🏗 Structo the Builder  
-    Obsłuż stronę 404 – zwróć plik 404.html i zaloguj błąd.   
-*/
-/*
-  🏗 Structo the Builder  
-    Uruchom serwer i nasłuchuj na porcie z config.js.    
-*/
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+
+app.use(morgan("dev"));
+
+
+app.use("/", requestRouting);
+
+
+app.use((req, res) => {
+  res.status(404).sendFile(path.join(__dirname, "public", "404.html"));
+  console.error(`Błąd 404: ${req.url} nie istnieje.`);
+});
+
+
+app.listen(config.PORT, () => {
+  console.log(`Serwer działa na: http://localhost:${config.PORT}`);
+});
